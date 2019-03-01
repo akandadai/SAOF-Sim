@@ -48,11 +48,14 @@ def generateAvailableRobots(robot_num, robot_list):
 
 def simulateFactory(problem_parameters, simulation_parameters):
 
-	for key,val in problem_parameters.items():
-		exec(key + '=val')
-	for key,val in simulation_parameters.items():
-		exec(key + '=val')    
+	# for key,val in problem_parameters.items():
+	# 	exec(key + '=val')
+	# for key,val in simulation_parameters.items():
+	# 	exec(key + '=val')
 
+	globals().update(problem_parameters)
+	globals().update(simulation_parameters)
+	
 	np.random.seed(random_seed)
 
 	initial_tasks = int(round(max_tasks * initial_percentage))
@@ -116,6 +119,11 @@ def simulateFactory(problem_parameters, simulation_parameters):
 					
 		robot_list, task_list, tasks_completed = simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_completed)
 		
+		#sum of job completion using makespan variable
+		# if tasks_completed:
+		# 	makespan += time
+
+
 		goal_distance_vector = [round(float(robot_list[i].robot_details["goal_distance"]), 2) for i in range(len(robot_list))]
 		print ("Time step: %d, Distance vector: [%s]" % (time, ', '.join(map(str, goal_distance_vector))))
 		
