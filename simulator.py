@@ -9,7 +9,7 @@ import time as myTime
 
 class robot:
     def __init__(self, i, locations):
-        self.movement_speed = np.random.normal(3, 0.2, 1)
+        self.movement_speed = np.random.normal(3, 0.2)
         self.failure_rate = np.random.normal(2, 0.5, 1)
         self.consumption_rate = np.random.normal(2, 0.5, 1)
         self.robot_details = {"ID": i, "assigned": -1, "goal_distance": -1, "location": np.random.random_integers(1, locations) - 1}
@@ -20,7 +20,7 @@ class task:
 		self.task_details = {"ID": i, "subtasks": -1, "robot": -1, "start": -1, "end": -1}
 		self.task_details["subtasks"] = np.random.random_integers(2, max_subtasks)
 		self.subtask_locations = [np.random.random_integers(1, locations) - 1 for subtask in range(self.task_details["subtasks"])]
-
+		self.task_value = np.random.randint(1, max_task_value)
 		self.task_total_distance = self.__get_total_distance__(distance_matrix)
 	
 	def __get_total_distance__(self, distance_matrix):
@@ -119,41 +119,56 @@ def simulateFactory(problem_parameters, simulation_parameters):
 				assignment = allocateRandom(master_queue, available_robots, time)			
 			elif allocation_method == "naive":
 				assignment = allocateNaive(master_queue, available_robots, time)
-				print("assignment: ", assignment)
+			elif allocation_method == "WSPT":
+				assignment = allocateWSPT(master_queue, available_robots, distance_matrix)
+				
 			else:
 				print ("Specified allocation method invalid.")
 				break
-
+			print("assignment: ", assignment)
 			if len(assignment) != 0:
 				for i in range(len(available_robots)):
 					if (i < len(master_queue)):
 						robot_list[assignment[i][0]].robot_details["assigned"] = assignment[i][1]
 						task_list[assignment[i][1]].task_details["robot"] = assignment[i][0]
 						task_list[assignment[i][1]].task_details["start"] = time
+						
 		
 			iterations += 1
-					
-		robot_list, task_list, tasks_completed = simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_completed)
-		
-		#sum of job completion using makespan variable
-		if tasks_completed:
-			SumOfJobCompletion += time
 
+			
+		robot_list, task_list, tasks_completed, new_completed_tasks = simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_completed)
+		
+		#sum of job completion time
+		if new_completed_tasks:
+			new_value = 0
+			for i in new_completed_tasks:
+				print(task_list[i].task_value)
+				print(time)
+				new_value += task_list[i].task_value * time
+
+			SumOfJobCompletion += new_value
+			print("new weighted sum of time: ", SumOfJobCompletion)
+
+			print("tasks completed: ", tasks_completed)
 
 		goal_distance_vector = [round(float(robot_list[i].robot_details["goal_distance"]), 2) for i in range(len(robot_list))]
-		print ("Time step: %d, Distance vector: [%s]" % (time, ', '.join(map(str, goal_distance_vector))))
+		#print ("Time step: %d, Distance vector: [%s]" % (time, ', '.join(map(str, goal_distance_vector))))
 		
 		time += 1
 		
-	SumOfJobCompletion = time
+	
 	
 	return SumOfJobCompletion
 
 def simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_completed):
+	completed_tasks = []
 	for i in range(len(robot_list)):
 		if robot_list[i].robot_details["assigned"] != -1: 
 			if robot_list[i].robot_details["goal_distance"] == 0: 
-				print ("Time step: %d, Task %d completed!" % (time, task_list[robot_list[i].robot_details["assigned"]].task_details["ID"]))
+				completed_task = task_list[robot_list[i].robot_details["assigned"]].task_details["ID"]
+				print ("Time step: %d, Task %d completed!" % (time, completed_task))
+				completed_tasks.append(completed_task)
 				task_list[robot_list[i].robot_details["assigned"]].task_details["end"] = time 
 				task_list[robot_list[i].robot_details["assigned"]].task_details["robot"] = -1
 				tasks_completed = tasks_completed + 1 
@@ -166,5 +181,5 @@ def simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_complet
 					robot_list[i].robot_details["goal_distance"] += distance_matrix[task_list[robot_list[i].robot_details["assigned"]].subtask_locations[j]][task_list[robot_list[i].robot_details["assigned"]].subtask_locations[j+1]]
 				robot_list[i].robot_details["goal_distance"] = max((robot_list[i].robot_details["goal_distance"] - robot_list[i].movement_speed * (time - task_list[robot_list[i].robot_details["assigned"]].task_details["start"])), 0)
 
-	return robot_list, task_list, tasks_completed
+	return robot_list, task_list, tasks_completed, completed_tasks
 
