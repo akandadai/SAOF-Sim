@@ -16,10 +16,21 @@ class robot:
         self.task_completions = []
 
 class task:
-    def __init__(self, i, max_subtasks, locations):
-        self.task_details = {"ID": i, "subtasks": -1, "robot": -1, "start": -1, "end": -1}
-        self.task_details["subtasks"] = np.random.random_integers(2, max_subtasks)
-        self.subtask_locations = [np.random.random_integers(1, locations) - 1 for subtask in range(self.task_details["subtasks"])]
+	def __init__(self, i, max_subtasks, locations, distance_matrix):
+		self.task_details = {"ID": i, "subtasks": -1, "robot": -1, "start": -1, "end": -1}
+		self.task_details["subtasks"] = np.random.random_integers(2, max_subtasks)
+		self.subtask_locations = [np.random.random_integers(1, locations) - 1 for subtask in range(self.task_details["subtasks"])]
+
+		self.task_total_distance = self.__get_total_distance__(distance_matrix)
+	
+	def __get_total_distance__(self, distance_matrix):
+		total = 0
+		for subtask_i in range(len(self.subtask_locations)-1):
+			task_loc = self.subtask_locations[subtask_i]
+			next_task_loc = self.subtask_locations[subtask_i + 1]
+			total += distance_matrix[task_loc][next_task_loc]
+
+		return total
 
 def generateFacility(locations, max_distance):
     distance_matrix = [[np.random.random_integers(max_distance) for i in range(locations)] for i in range(locations)]
@@ -61,8 +72,12 @@ def simulateFactory(problem_parameters, simulation_parameters):
 	initial_tasks = int(round(max_tasks * initial_percentage))
 	distance_matrix = generateFacility(locations, max_distance)
 	task_arrivals = generateTaskArrivals(rate, initial_tasks, max_tasks)
-	task_list = [task(i, max_subtasks, locations) for i in range(max_tasks)]
+	task_list = [task(i, max_subtasks, locations, distance_matrix) for i in range(max_tasks)]
 	robot_list = [robot(i, locations) for i in range(robot_num)]
+
+	for task_i in task_list:
+		i = task_i.task_details["ID"]
+		print(f"task distance for task {i}: {task_i.task_total_distance}")
 
 	master_queue = []
 	available_robots = []
@@ -104,6 +119,7 @@ def simulateFactory(problem_parameters, simulation_parameters):
 				assignment = allocateRandom(master_queue, available_robots, time)			
 			elif allocation_method == "naive":
 				assignment = allocateNaive(master_queue, available_robots, time)
+				print("assignment: ", assignment)
 			else:
 				print ("Specified allocation method invalid.")
 				break
