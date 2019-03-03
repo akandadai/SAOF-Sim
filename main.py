@@ -18,6 +18,6 @@ if __name__ == '__main__':
 
 	makespan = simulateFactory(problem_parameters, simulation_parameters)
 
-	print ("\n|===|\n(COMPLETE) Execution Makespan: %d \n|===|" % (makespan))
+	print ("\n|===|\n(COMPLETE) Execution Sum Of Job Completion Time: %d \n|===|" % (makespan))
 
 

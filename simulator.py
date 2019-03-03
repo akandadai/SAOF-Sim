@@ -81,7 +81,7 @@ def simulateFactory(problem_parameters, simulation_parameters):
 
 	master_queue = []
 	available_robots = []
-	makespan = 0
+	SumOfJobCompletion = 0
 	tasks_completed = 0
 	time = 0
 	
@@ -136,8 +136,8 @@ def simulateFactory(problem_parameters, simulation_parameters):
 		robot_list, task_list, tasks_completed = simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_completed)
 		
 		#sum of job completion using makespan variable
-		# if tasks_completed:
-		# 	makespan += time
+		if tasks_completed:
+			SumOfJobCompletion += time
 
 
 		goal_distance_vector = [round(float(robot_list[i].robot_details["goal_distance"]), 2) for i in range(len(robot_list))]
@@ -145,9 +145,9 @@ def simulateFactory(problem_parameters, simulation_parameters):
 		
 		time += 1
 		
-	makespan = time
+	SumOfJobCompletion = time
 	
-	return makespan
+	return SumOfJobCompletion
 
 def simulateTimeStep(robot_list, task_list, distance_matrix, time, tasks_completed):
 	for i in range(len(robot_list)):
