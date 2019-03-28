@@ -13,21 +13,23 @@ import sys
 if __name__ == "__main__":
 	args = sys.argv[1:]
     ## Adjust below parameters for your experiments
+
+	#max_subtasks should <= locations or there will be multiple subtasks per location (which will be completed together anyway)
 	problem_parameters = {
-        "robot_num": 3,
-        "max_subtasks": 3,
-        "max_tasks": 10,
-        "initial_percentage": 0.2,
+        "robot_num": 10,
+        "max_subtasks": 10,
+        "max_tasks": 60,
+        "initial_percentage": 0.3,
         "horizon": 100,
-        "max_distance": 300,
-        "locations": 15,
-        "max_task_value": 20,
+        "max_distance": 100,
+        "locations": 100,
+        "max_task_value": 10,
     }
 
 	simulation_parameters = {
-        "random_seed": 0,
+        "random_seed": 3,
         "rate": 1.5,
-        "allocation_method": str(args[0]),
+        "allocation_method": str(args[0]) if args else "WSPT",
         "min_available_robots": 1,
         "max_wait": 0,
     }

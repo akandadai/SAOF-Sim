@@ -20,7 +20,7 @@ class task:
 		self.task_details = {"ID": i, "subtasks": -1, "robot": -1, "start": -1, "end": -1}
 		self.task_details["subtasks"] = np.random.random_integers(2, max_subtasks)
 		self.subtask_locations = [np.random.random_integers(1, locations) - 1 for subtask in range(self.task_details["subtasks"])]
-		self.task_value = np.random.randint(1, max_task_value)
+		self.task_value = np.random.random_integers(1, max_task_value)
 		self.task_total_distance = self.__get_total_distance__(distance_matrix)
 	
 	def __get_total_distance__(self, distance_matrix):
